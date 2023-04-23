@@ -1,6 +1,7 @@
 const moment = require('moment')
 const fs = require('fs')
 
+//get formatted calnedar filo to JSON
 function calendarJSON(calendarNumber) {
 
 	 let rawdata = fs.readFileSync('./calendars/calendar.' + calendarNumber + '.json')
@@ -8,7 +9,7 @@ function calendarJSON(calendarNumber) {
 }
 
 //free slots that are not in conflict with current sessions
-function getAvailableSlots(data, date) {
+function getFreeSlots(data, date) {
 
     const slots = data.slots[date] || []
     const sessions = data.sessions[date] || []
@@ -45,7 +46,7 @@ function getAvailableSlots(data, date) {
 * @param {number} durationAfter - The duration after the appointment.
 * @returns {Array} An array of available time slots.
 */
-function getSlots(realSpots, dateISO, durationBefore, duration, durationAfter) {
+function getFormattedSlots(realSpots, dateISO, durationBefore, duration, durationAfter) {
     //will return this after storing the data
     const arrSlot = []
     //check all the time slots and see if given the duration you will have enough time
@@ -56,8 +57,6 @@ function getSlots(realSpots, dateISO, durationBefore, duration, durationAfter) {
         const end = moment.utc(dateISO + ' ' + slot.end)
         //loop to check if the duration fits the time slot
         while (start.isBefore(end)) {
-            console.log('--------------------------------------------------WHILE------------------------------------------------')
-            console.log('start', start)
             //get start and end times with duration of the appointment
             const clientStartHour = start.clone().add(durationBefore, 'minutes')
             const clientEndHour = clientStartHour.clone().add(duration, 'minutes')
@@ -86,27 +85,26 @@ function getSlots(realSpots, dateISO, durationBefore, duration, durationAfter) {
 function getAvailableSpots(calendar, date, duration) {
     
     let data = calendarJSON(calendar)
-    // console.log('data', data)
-
     const dateISO = moment(date, 'DD-MM-YYYY').format('YYYY-MM-DD')
     let durationBefore = data.durationBefore;
     let durationAfter = data.durationAfter;
     let daySlots = []
+
+    //check we have slots/data for the current date before doing anything
     if (data.slots.hasOwnProperty(date)) {
         daySlots = data.slots[date]
     }
-    // console.log('day slots', daySlots)
+    //if day slots don't exist return an empty arr
+    if(daySlots.length === 0) {
+        return []
+    }
 
-    // console.log('data sessions', data.sessions)
-    // console.log(`data sessions w/date ${date}`, data.sessions[date])
-    // console.log('----- new algo')
+    //get all the available slots
     let availableSlots = []
+    availableSlots = getFreeSlots(data, date)
 
-    availableSlots = getAvailableSlots(data, date)
-    // console.log('formatted:', availableSlots)
-
-    let arrSlot = getSlots(availableSlots, dateISO, durationBefore, duration, durationAfter)
-    // console.log('REEEEEEEEEEEEEEEEEEEEEEEEEES', arrSlot)
+    //get the formatted data for the tests and check for duration
+    let arrSlot = getFormattedSlots(availableSlots, dateISO, durationBefore, duration, durationAfter)
     return arrSlot
 }
 
