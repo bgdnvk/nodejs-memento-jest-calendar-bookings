@@ -2,10 +2,39 @@ const moment = require('moment')
 const fs = require('fs')
 
 function calendarJSON(calendarNumber) {
+
 	 let rawdata = fs.readFileSync('./calendars/calendar.' + calendarNumber + '.json')
 	 return JSON.parse(rawdata)
 }
 
+function getAvailableSlots(data, date) {
+
+    const slots = data.slots[date] || []
+    const sessions = data.sessions[date] || []
+
+    //filter slots that conflict with sessions (aka are booked) 
+    return slots.filter(({ start: slotStart, end: slotEnd }) => {
+
+        //get moment objects
+        const slotStartTime = moment(`${date} ${slotStart}`, 'DD-MM-YYYY HH:mm')
+        const slotEndTime = moment(`${date} ${slotEnd}`, 'DD-MM-YYYY HH:mm')
+        //check for overlap
+        return !sessions.some(({ start: sessionStart, end: sessionEnd }) => {
+
+            //convert times into moment objects
+            const sessionStartTime = moment(`${date} ${sessionStart}`, 'DD-MM-YYYY HH:mm')
+            const sessionEndTime = moment(`${date} ${sessionEnd}`, 'DD-MM-YYYY HH:mm')
+            //main logic to check for overlap
+            //https://momentjscom.readthedocs.io/en/latest/moment/05-query/06-is-between/
+            return (
+                slotStartTime.isBetween(sessionStartTime, sessionEndTime, null, '[)') ||
+                slotEndTime.isBetween(sessionStartTime, sessionEndTime, null, '(]') ||
+                sessionStartTime.isBetween(slotStartTime, slotEndTime, null, '[)') ||
+                sessionEndTime.isBetween(slotStartTime, slotEndTime, null, '(]')
+            )
+        })
+    })
+}
 function getAvailableSpots(calendar, date, duration) {
     
     let data = calendarJSON(calendar)
@@ -19,44 +48,13 @@ function getAvailableSpots(calendar, date, duration) {
     if (data.slots.hasOwnProperty(date)) {
         daySlots = data.slots[date]
     }
-    console.log('day slots', daySlots)
+    // console.log('day slots', daySlots)
 
-    console.log('data sessions', data.sessions)
-    console.log(`data sessions w/date ${date}`, data.sessions[date])
-
-
-
-    console.log('----- new algo')
+    // console.log('data sessions', data.sessions)
+    // console.log(`data sessions w/date ${date}`, data.sessions[date])
+    // console.log('----- new algo')
     let availableSlots = []
 
-    function getAvailableSlots(data, date) {
-
-        const slots = data.slots[date] || []
-        const sessions = data.sessions[date] || []
-
-        //filter slots that conflict with sessions (aka are booked) 
-        return slots.filter(({ start: slotStart, end: slotEnd }) => {
-            //get moment objects
-            const slotStartTime = moment(`${date} ${slotStart}`, 'DD-MM-YYYY HH:mm')
-            const slotEndTime = moment(`${date} ${slotEnd}`, 'DD-MM-YYYY HH:mm')
-
-            //check for overlap
-            return !sessions.some(({ start: sessionStart, end: sessionEnd }) => {
-                //convert times into moment objects
-                const sessionStartTime = moment(`${date} ${sessionStart}`, 'DD-MM-YYYY HH:mm')
-                const sessionEndTime = moment(`${date} ${sessionEnd}`, 'DD-MM-YYYY HH:mm')
-
-                //main logic to check for overlap
-                //https://momentjscom.readthedocs.io/en/latest/moment/05-query/06-is-between/
-                return (
-                    slotStartTime.isBetween(sessionStartTime, sessionEndTime, null, '[)') ||
-                    slotEndTime.isBetween(sessionStartTime, sessionEndTime, null, '(]') ||
-                    sessionStartTime.isBetween(slotStartTime, slotEndTime, null, '[)') ||
-                    sessionEndTime.isBetween(slotStartTime, slotEndTime, null, '(]')
-                );
-            });
-        });
-    }
 
     availableSlots = getAvailableSlots(data, date)
     console.log('formatted:', availableSlots)
