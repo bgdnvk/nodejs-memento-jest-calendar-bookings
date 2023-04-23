@@ -1,0 +1,29 @@
+{
+  "name": "nodejs-memento-jest-calendar-bookings",
+  "version": "1.0.0",
+  "description": "nodejs and memento example with times and dates",
+  "main": "index.js",
+  "scripts": {
+    "test": "jest Calendar.test.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bgdnvk/nodejs-memento-jest-calendar-bookings.git"
+  },
+  "keywords": [
+    "javascript",
+    "nodejs",
+    "memento",
+    "jest"
+  ],
+  "author": "Bogdan Novykov",
+  "license": "GNU gpl v3",
+  "bugs": {
+    "url": "https://github.com/bgdnvk/nodejs-memento-jest-calendar-bookings/issues"
+  },
+  "homepage": "https://github.com/bgdnvk/nodejs-memento-jest-calendar-bookings#readme",
+  "dependencies": {
+    "jest": "^29.5.0",
+    "moment": "^2.29.4"
+  }
+}
