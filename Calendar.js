@@ -15,13 +15,11 @@ function getAvailableSlots(data, date) {
 
     //filter slots that conflict with sessions (aka are booked) 
     return slots.filter(({ start: slotStart, end: slotEnd }) => {
-
         //get moment objects
         const slotStartTime = moment(`${date} ${slotStart}`, 'DD-MM-YYYY HH:mm')
         const slotEndTime = moment(`${date} ${slotEnd}`, 'DD-MM-YYYY HH:mm')
         //check for overlap
         return !sessions.some(({ start: sessionStart, end: sessionEnd }) => {
-
             //convert times into moment objects
             const sessionStartTime = moment(`${date} ${sessionStart}`, 'DD-MM-YYYY HH:mm')
             const sessionEndTime = moment(`${date} ${sessionEnd}`, 'DD-MM-YYYY HH:mm')
@@ -88,8 +86,7 @@ function getSlots(realSpots, dateISO, durationBefore, duration, durationAfter) {
 function getAvailableSpots(calendar, date, duration) {
     
     let data = calendarJSON(calendar)
-
-    console.log('data', data)
+    // console.log('data', data)
 
     const dateISO = moment(date, 'DD-MM-YYYY').format('YYYY-MM-DD')
     let durationBefore = data.durationBefore;
